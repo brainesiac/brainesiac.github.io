@@ -8,7 +8,7 @@ function nav() {
   }
 
 
-function auth (username,password) {  
+function auth () {  
   const loginForm = document.getElementById("login");
   const loginButton = document.getElementById("log");
   const loginErrorMsg = document.getElementById("message");
@@ -17,14 +17,13 @@ function auth (username,password) {
       // Prevent the default submission of the form
      // e.preventDefault();
       // Get the values input by the user in the form fields
-      //const username = loginForm.Uname.value;
-      //const password = loginForm.Pass.value;
+      const username = loginForm.Uname.value;
+      const password = loginForm.Pass.value;
   
       if (username === "brainesiac" && password === "brainesiac1234") {
-          location.assign("./loggedin.html");
+        location.assign("./loggedin.html");
       } else {
           // Otherwise, make the login error message show (change its oppacity)
           loginErrorMsg.textContent  = "Login Failed" ;
       }
-  })
-)
+}
