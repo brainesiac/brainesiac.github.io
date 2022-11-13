@@ -1,0 +1,25 @@
+{"giftList" : [{
+    "item": "pants",
+    "url": "https://www.levi.com/US/en_US/clothing/men/jeans/straight/501-original-shrink-to-fit-mens-jeans/p/005010000",
+    "notes": "32/32",
+    "purchased": false
+    },
+    { "item": "bag",
+    "url": "https://www.timbuk2.com/collections/sling-bags/products/1166-vapor-sling-crossbody-bag?variant=32253776166954",
+    "notes": "granite",
+    "purchased": false
+    },
+    {
+    "item": "jacket",
+    "url": "https://www.llbean.com/llb/shop/126201?page=mens-insulated-3-season-hooded-jacket",
+    "notes": "medium, thyme",
+    "purchased": false
+    },
+    {
+    "item": "sweater",
+    "url": "https://www.llbean.com/llb/shop/127430?page=mens-beans-heritage-soft-cotton-fisherman-henley-hoodie-mens-regular",
+    "notes": "medium, pebble grey",
+    "purchased": false
+    }
+]
+}
