@@ -1,0 +1,10 @@
+{
+    "configurations": [
+        {
+            "type": "chrome",
+            "name": "file:///media/fuse/crostini_8baddf1294c9a9eb44f64edf06ac1ee3916a0d58_termina_penguin/website/brainesiac.github.io/giftList",
+            "request": "launch",
+            "url": "file:///media/fuse/crostini_8baddf1294c9a9eb44f64edf06ac1ee3916a0d58_termina_penguin/website/brainesiac.github.io/giftList"
+        }
+    ]
+}
