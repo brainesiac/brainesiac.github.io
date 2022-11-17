@@ -28,7 +28,9 @@ function auth () {
       }
 }
 
-
+function addOnClickToElement(checkbox,value,id) { console.log(checkbox) // Note this is a function
+checkbox.onclick = function(){console.log(checkbox); execute(value,id);};
+}
 
 function giftCheck() {
   loc = "giftList!A1:D10"
@@ -52,10 +54,15 @@ function giftCheck() {
       var item = document.createElement('li')
       var checkbox = document.createElement('input');
       checkbox.type = "checkbox";
+      checkbox.className = "listitem"
       checkbox.value = g;
       checkbox.name = glist.values[g][0];
       checkbox.id = glist.values[g][0];
-      checkbox.onclick = function(){execute();};
+      checkbox.disabled = "true";
+      //checkbox.onclick = function(checkbox) {console.log(checkbox); execute(checkbox.value,checkbox.id);};
+      addOnClickToElement(checkbox,g,glist.values[g][0])
+
+      console.log(checkbox)
       item.appendChild(checkbox);
       var a = document.createElement('a');
       var link = document.createTextNode(glist.values[g][0]+" "+glist.values[g][2])
@@ -73,7 +80,6 @@ function giftCheck() {
     document.getElementById("pList").appendChild(plist);
     }
     for (p in pl){
-      console.log(pl[p])
       document.getElementById(pl[p]).checked = true;
     };
   }
@@ -81,11 +87,14 @@ function giftCheck() {
 }
 
 function changeVal(value,id){
+  console.log(value,id)
   adjloc = +value+2;
-  console.log(id)
+  console.log(adjloc)
   state = document.getElementById(id).checked;
   loc = "giftList!D"+adjloc
-  setData(loc,state)
+  ud = {range : loc,
+        st : state};
+  return ud
 }
 
 function getData(loc){
@@ -110,42 +119,14 @@ function getData(loc){
 return retdata()
 }
 
-function setData(loc,val){
-  console.log("message 1")
-  base = "https://sheets.googleapis.com/v4/spreadsheets/1TQyElcS-lS8pyjHbAuRsnPVkOoOUkK4MwVTHxTXp8Rk/values/"
-  key = "?key=AIzaSyBBcqHGTovM9CdcugNAzUClafSxKUxxMNU"
-  url = base +loc+key
-  let headersList = {
-    "Accept": "*/*"
-   }
-   console.log(url)
-  var valBody = {
-    "range": loc,
-    "majorDimension": "ROWS",
-    "values": "["+val+"]"
-  };
-  /*var params = { "spreadsheetId" : "1TQyElcS-lS8pyjHbAuRsnPVkOoOUkK4MwVTHxTXp8Rk",
-              "range" : loc,
-              "valueInputOption" : "USER_ENTERED",
-              "valueRangeBody"  : valBody
-            };
-  */     
-  
-  console.log(url,{ "method" : "POST" , valBody})
-
-  var sheet = fetch(url,{ "method" : "PUT" , valBody})
-  .then((response) => response.json())
-  .then((json) => {return json} )
-  .catch(error => console.log(error));
-
-  const retdata = async () => {
-    const data = await sheet;
-    return data
+function enableboxes(){
+ boxes = document.getElementsByClassName("listitem")
+  for (i in boxes){
+    if (boxes[i].id != null){
+    el = document.getElementById(boxes[i].id).disabled = null
     }
-  return retdata()
+  }
 }
-
-
 
 function authenticate() {
   return gapi.auth2.getAuthInstance()
@@ -157,22 +138,24 @@ function authenticate() {
 function loadClient() {
   gapi.client.setApiKey("AIzaSyBBcqHGTovM9CdcugNAzUClafSxKUxxMNU");
   return gapi.client.load("https://sheets.googleapis.com/$discovery/rest?version=v4")
-      .then(function() { console.log("GAPI client loaded for API"); },
+      .then(function() { console.log("GAPI client loaded for API"); enableboxes();},
             function(err) { console.error("Error loading GAPI client for API", err); });
 }
 
 // Make sure the client is loaded and sign-in is complete before calling this method.
-function execute() {
+function execute(val,id) {
+  console.log(val,id) 
+  updates = changeVal(val,id)
   return gapi.client.sheets.spreadsheets.values.update({
     "spreadsheetId": "1TQyElcS-lS8pyjHbAuRsnPVkOoOUkK4MwVTHxTXp8Rk",
-    "range": "giftList!D6",
+    "range": updates.range,
     "valueInputOption": "USER_ENTERED",
     "resource": {
-      "range": "giftList!D6",
+      "range": updates.range,
       "majorDimension": "ROWS",
       "values": [
         [
-          "FALSE"
+          updates.st
         ]
       ]
     }
@@ -185,6 +168,6 @@ function execute() {
 }
 
 function loadgapi() {
-  gapi.load("client:auth2", function() {gapi.auth2.init({client_id: "192901857564-ed80v40tkh842ir2sp2rbn7i971d2vhj.apps.googleusercontent.com"});
+  gapi.load("client:auth2", function() {gapi.auth2.init({client_id: "192901857564-ed80v40tkh842ir2sp2rbn7i971d2vhj.apps.googleusercontent.com", plugin_name : "Brainesiac Heavy Industries"});
 });
 }
