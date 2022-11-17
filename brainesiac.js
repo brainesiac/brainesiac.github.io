@@ -175,46 +175,6 @@ function execute(val,id) {
 
 function loadgapi() {
   gapi.load("client:auth2", function() {gapi.auth2.init({client_id: "192901857564-ed80v40tkh842ir2sp2rbn7i971d2vhj.apps.googleusercontent.com", plugin_name : "Brainesiac Heavy Industries"});
-}).then(function () {
-  GoogleAuth = gapi.auth2.getAuthInstance();
-
-  // Listen for sign-in state changes.
-  GoogleAuth.isSignedIn.listen(updateSigninStatus);
-
-  // Handle initial sign-in state. (Determine if user is already signed in.)
-  var user = GoogleAuth.currentUser.get();
-  setSigninStatus();
-
-  // Call handleAuthClick function when user clicks on
-  //      "Sign In/Authorize" button.
-  $('#sign-in-or-out-button').click(function() {
-    handleAuthClick();
-  });
-  $('#revoke-access-button').click(function() {
-    revokeAccess();
-  });
-});
+})
 }
 
-function setSigninStatus() {
-  var user = GoogleAuth.currentUser.get();
-  console.log(user)
-  var isAuthorized = user.hasGrantedScopes("https://www.googleapis.com/auth/drive https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/spreadsheets");
-  console.log(isAuthorized)
-  if (isAuthorized) {
-    $('#sign-in-or-out-button').html('Sign out');
-    $('#revoke-access-button').css('display', 'inline-block');
-    $('#auth-status').html('You are currently signed in and have granted ' +
-        'access to this app.');
-  } else {
-    $('#sign-in-or-out-button').html('Sign In/Authorize');
-    $('#revoke-access-button').css('display', 'none');
-    $('#auth-status').html('You have not authorized this app or you are ' +
-        'signed out.');
-  }
-}
-
-
-function updateSigninStatus() {
-  setSigninStatus();
-}
