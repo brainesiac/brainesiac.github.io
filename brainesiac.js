@@ -28,8 +28,21 @@ function auth () {
       }
 }
 
-function addOnClickToElement(checkbox,value,id) { console.log(checkbox) // Note this is a function
-checkbox.onclick = function(){console.log(checkbox); execute(value,id);};
+function rebuildLists(id){
+  item = document.getElementById(id);
+  par = item.parentElement;
+  ul = document.getElementById("ulist");
+  pl = document.getElementById("plist");
+  state = item.checked;
+  if (state == true){
+    pl.appendChild(par);
+  }else{
+    ul.appendChild(par);
+  }
+}
+
+function addOnClickToElement(checkbox,value,id) {  // Note this is a function
+checkbox.onclick = function(){ execute(value,id).then(rebuildLists(id));};
 }
 
 function giftCheck() {
@@ -45,11 +58,11 @@ function giftCheck() {
   var list = getData(loc)
   const goodlist = async () => {
     const glist = await list;
-    console.log(glist);
     var ulist = document.createElement('ul');
+    ulist.id = "ulist";
     var plist = document.createElement('ul');
+    plist.id = "plist";
     var keys = glist.values.shift();
-    console.log(keys)
     for (g in glist.values){
       var item = document.createElement('li')
       var checkbox = document.createElement('input');
@@ -61,8 +74,6 @@ function giftCheck() {
       checkbox.disabled = "true";
       //checkbox.onclick = function(checkbox) {console.log(checkbox); execute(checkbox.value,checkbox.id);};
       addOnClickToElement(checkbox,g,glist.values[g][0])
-
-      console.log(checkbox)
       item.appendChild(checkbox);
       var a = document.createElement('a');
       var link = document.createTextNode(glist.values[g][0]+" "+glist.values[g][2])
@@ -87,9 +98,7 @@ function giftCheck() {
 }
 
 function changeVal(value,id){
-  console.log(value,id)
   adjloc = +value+2;
-  console.log(adjloc)
   state = document.getElementById(id).checked;
   loc = "giftList!D"+adjloc
   ud = {range : loc,
@@ -101,8 +110,6 @@ function getData(loc){
   base = "https://sheets.googleapis.com/v4/spreadsheets/1TQyElcS-lS8pyjHbAuRsnPVkOoOUkK4MwVTHxTXp8Rk/values/"
   key = "?key=AIzaSyBBcqHGTovM9CdcugNAzUClafSxKUxxMNU"
   url = base +loc+key
-
-  console.log(url)
   let headersList = {
     "Accept": "*/*",
     "method" : "GET"
@@ -144,7 +151,6 @@ function loadClient() {
 
 // Make sure the client is loaded and sign-in is complete before calling this method.
 function execute(val,id) {
-  console.log(val,id) 
   updates = changeVal(val,id)
   return gapi.client.sheets.spreadsheets.values.update({
     "spreadsheetId": "1TQyElcS-lS8pyjHbAuRsnPVkOoOUkK4MwVTHxTXp8Rk",
@@ -169,5 +175,46 @@ function execute(val,id) {
 
 function loadgapi() {
   gapi.load("client:auth2", function() {gapi.auth2.init({client_id: "192901857564-ed80v40tkh842ir2sp2rbn7i971d2vhj.apps.googleusercontent.com", plugin_name : "Brainesiac Heavy Industries"});
+}).then(function () {
+  GoogleAuth = gapi.auth2.getAuthInstance();
+
+  // Listen for sign-in state changes.
+  GoogleAuth.isSignedIn.listen(updateSigninStatus);
+
+  // Handle initial sign-in state. (Determine if user is already signed in.)
+  var user = GoogleAuth.currentUser.get();
+  setSigninStatus();
+
+  // Call handleAuthClick function when user clicks on
+  //      "Sign In/Authorize" button.
+  $('#sign-in-or-out-button').click(function() {
+    handleAuthClick();
+  });
+  $('#revoke-access-button').click(function() {
+    revokeAccess();
+  });
 });
+}
+
+function setSigninStatus() {
+  var user = GoogleAuth.currentUser.get();
+  console.log(user)
+  var isAuthorized = user.hasGrantedScopes("https://www.googleapis.com/auth/drive https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/spreadsheets");
+  console.log(isAuthorized)
+  if (isAuthorized) {
+    $('#sign-in-or-out-button').html('Sign out');
+    $('#revoke-access-button').css('display', 'inline-block');
+    $('#auth-status').html('You are currently signed in and have granted ' +
+        'access to this app.');
+  } else {
+    $('#sign-in-or-out-button').html('Sign In/Authorize');
+    $('#revoke-access-button').css('display', 'none');
+    $('#auth-status').html('You have not authorized this app or you are ' +
+        'signed out.');
+  }
+}
+
+
+function updateSigninStatus() {
+  setSigninStatus();
 }
