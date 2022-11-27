@@ -178,3 +178,16 @@ function loadgapi() {
 })
 }
 
+function decodeJwtResponse(token) {
+  console.log("Hello")
+  urlString = "https://oauth2.googleapis.com/tokeninfo?id_token="
+  url = urlString + token
+  var decodedToken = fetch(url)
+  .then((response) => response.json())
+  .then((json) => {return json} )
+  .catch(error => console.log(error));
+
+return decodedToken
+
+}
+
