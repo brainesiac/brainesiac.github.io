@@ -1,3 +1,9 @@
+  const DD = "https://sheets.googleapis.com/$discovery/rest?version=v4";
+  const API_KEY = "AIzaSyBBcqHGTovM9CdcugNAzUClafSxKUxxMNU";
+  const CLIENT_ID = '192901857564-v2nbtq9h4f1sr3q55e1gv8oi3nahu8me.apps.googleusercontent.com';
+  var tokenClient;
+  var access_token;
+
 function nav() {
     var x = document.getElementById("myLinks");
     if (x.style.display === "block") {
@@ -42,7 +48,7 @@ function rebuildLists(id){
 }
 
 function addOnClickToElement(checkbox,value,id) {  // Note this is a function
-checkbox.onclick = function(){ execute(value,id).then(rebuildLists(id));};
+checkbox.onclick = async function(){ await handleAuthClick(value,id); rebuildLists(id) };
 }
 
 function giftCheck() {
@@ -94,7 +100,7 @@ function giftCheck() {
       document.getElementById(pl[p]).checked = true;
     };
   }
-  goodlist()
+  goodlist();
 }
 
 function changeVal(value,id){
@@ -135,22 +141,10 @@ function enableboxes(){
   }
 }
 
-function authenticate() {
-  return gapi.auth2.getAuthInstance()
-      .signIn({scope: "https://www.googleapis.com/auth/drive https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/spreadsheets"})
-      .then(function() { console.log("Sign-in successful"); },
-            function(err) { console.error("Error signing in", err); });
-}
-
-function loadClient() {
-  gapi.client.setApiKey("AIzaSyBBcqHGTovM9CdcugNAzUClafSxKUxxMNU");
-  return gapi.client.load("https://sheets.googleapis.com/$discovery/rest?version=v4")
-      .then(function() { console.log("GAPI client loaded for API"); enableboxes();},
-            function(err) { console.error("Error loading GAPI client for API", err); });
-}
 
 // Make sure the client is loaded and sign-in is complete before calling this method.
 function execute(val,id) {
+  console.log()
   updates = changeVal(val,id)
   return gapi.client.sheets.spreadsheets.values.update({
     "spreadsheetId": "1TQyElcS-lS8pyjHbAuRsnPVkOoOUkK4MwVTHxTXp8Rk",
@@ -170,24 +164,76 @@ function execute(val,id) {
               // Handle the results here (response.result has the parsed body).
               console.log("Response", response);
             },
-            function(err) { console.error("Execute error", err); });
+            function(err) { console.error("Execute error", err); });         
 }
 
-function loadgapi() {
-  gapi.load("client:auth2", function() {gapi.auth2.init({client_id: "192901857564-ed80v40tkh842ir2sp2rbn7i971d2vhj.apps.googleusercontent.com", plugin_name : "Brainesiac Heavy Industries"});
-})
-}
 
-function decodeJwtResponse(token) {
-  console.log("Hello")
+
+function decodeJwtResponse(JWtoken) {
   urlString = "https://oauth2.googleapis.com/tokeninfo?id_token="
-  url = urlString + token
+  url = urlString + JWtoken
   var decodedToken = fetch(url)
   .then((response) => response.json())
   .then((json) => {return json} )
   .catch(error => console.log(error));
-
 return decodedToken
-
 }
 
+function initClientID(){
+  tokenClient =  google.accounts.oauth2.initTokenClient({
+  client_id: '192901857564-v2nbtq9h4f1sr3q55e1gv8oi3nahu8me.apps.googleusercontent.com',
+  scope: 'https://www.googleapis.com/auth/spreadsheets',
+  callback: (access_token) => { access_token = tokenClient.access_token;  },             
+  });
+  enableboxes();
+}
+
+function gapiLoaded() {
+  gapi.load('client', intializeGapiClient);
+  enableboxes();
+}
+
+async function intializeGapiClient() {
+  await gapi.client.init({
+    apiKey: API_KEY,
+    discoveryDocs: [DD],
+  });
+  gapiInited = true;
+console.log(gapi.client.getToken())
+}
+
+function gisLoaded() {
+  tokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: CLIENT_ID,
+    scope: 'https://www.googleapis.com/auth/spreadsheets',
+    callback: '', // defined later
+  });
+  gisInited = true;
+  console.log(tokenClient)
+  enableboxes();
+}
+
+function handleAuthClick(val,id) {
+  console.log(tokenClient)
+  tokenClient.callback = async (resp) => {
+    if (resp.error !== undefined) {
+      throw (resp);
+    }
+
+    await execute(val,id);
+  };
+
+  console.log(gapi.client.getToken())
+  console.log(tokenClient)
+
+  if (gapi.client.getToken() === null) {
+    // Prompt the user to select a Google Account and ask for consent to share their data
+    // when establishing a new session.
+    tokenClient.requestAccessToken({prompt: 'consent'});
+    
+  } else {
+    // Skip display of account chooser and consent dialog for an existing session.
+    tokenClient.callback;
+  }
+  return id
+}
